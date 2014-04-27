@@ -1,11 +1,11 @@
 /**
  * Created by michael on 2014/4/26.
  */
-(function() {
+
+define(function() {
     var GLOBAL = window || self,
         FUNCTION_KEY = '___name___',
         CONSTRUCTOR_KEY = '___constructor___';
-    GLOBAL.GLOBAL = GLOBAL;
     function _forEach(obj, method, context) {
         context = context || GLOBAL;
         if (obj instanceof Object) {
@@ -111,12 +111,12 @@
         }
     });
 
-    GLOBAL.core = {
+    return {
+        global: GLOBAL,
         hash: {
             forEach: _forEach,
             mixin: _mixin
         },
         Object: _Object
     };
-
-})();
+});
