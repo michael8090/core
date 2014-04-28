@@ -56,7 +56,7 @@ define(function() {
         });
     }
 
-    function _mixin() {
+    function _makePrototypeChain() {
         var args = [].slice.call(arguments),
             len = args.length,
             i,
@@ -70,24 +70,24 @@ define(function() {
             args[i + 1] = n;
         }
 
-        return n;
+        return n || arguments[0];
     }
 
     function _Object(config) {
-        this.init(config);
+        return this.init(config);
     }
 
-    _Object.extend = function(config) {
+    _Object.extend = function() {
         var SuperClass = this;
         if (!(SuperClass instanceof Function)) {
             throw 'Could only extend from a class constructor (Function).';
         }
         var constructor = function (config) {
-                this.init(config);
+                return this.init(config);
             },
             prototype = Object.create(new SuperClass());
 
-        prototype = _mixin.apply(this, [prototype].concat([].slice.apply(arguments)));
+        prototype = _makePrototypeChain.apply(this, [prototype].concat([].slice.apply(arguments)));
 //        _markFunction(config, prototype);
 //        _copy(prototype, config);
         prototype.constructor = constructor;
@@ -119,11 +119,32 @@ define(function() {
 
     _copy(_Object.prototype, {
         init: function(config) {
-            if (!config) {
-                return ;
+            if (!(config instanceof Object)) {
+                return this;
             }
-            _markFunction(config, this.constructor.prototype);
-            _copy(this, config);
+            if (!(config instanceof Array)) {
+                config = [config];
+            }
+            var prototypes = config;
+            prototypes.splice(0, 0, this.constructor.prototype);
+//                rootPrototype = Object.prototype,
+//                prototype = Object.getPrototypeOf(config);
+//            while(prototype !== rootPrototype) {
+//                prototypes.push(prototype);
+//                prototype = Object.getPrototypeOf(prototype);
+//            }
+//            prototypes.push(this.constructor.prototype);
+//            prototypes.reverse();
+            var chain = _makePrototypeChain.apply(this, prototypes),
+                finalPrototype = Object.getPrototypeOf(chain),
+                ret = Object.create(finalPrototype);
+
+//            _markFunction(config, finalPrototype);
+            _copy(ret, this, chain);
+            return ret;
+//            return _copy(_mixin.apply(this, prototypes))
+//            return _mixin([this.constructor.prototype].concat(args));
+//            _copy(this, config);
         }
     });
 
@@ -133,7 +154,7 @@ define(function() {
             forEach: _forEach,
             copy: _copy
         },
-//        mixin: _mixin,
+//        mixin: _makePrototypeChain,
         Object: _Object
     };
 });

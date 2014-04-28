@@ -8,7 +8,7 @@ require(['../core', 'Bubble', 'FlyingBubble'], function (core, Bubble, FlyingBub
     var n = 5,
         i;
     var config1 = {
-            changeColor: function() {
+            changeColor: function () {
                 this.color = 'rgba(' + Math.floor(Math.random() * 256) + ', ' + Math.floor(Math.random() * 256) + ', ' + Math.floor(Math.random() * 256) + ', ' + Math.random() + ')';
             },
             fly: function () {
@@ -17,8 +17,15 @@ require(['../core', 'Bubble', 'FlyingBubble'], function (core, Bubble, FlyingBub
             }
         },
         config2 = {
+            changeV: function () {
+                this.v = {
+                    x: Math.random() * 5,
+                    y: Math.random() * 5
+                };
+            },
             fly: function () {
-                this.radius += 10;
+                this.changeV();
+                this.radius += 20;
                 this._super();
             }
         };
@@ -26,16 +33,39 @@ require(['../core', 'Bubble', 'FlyingBubble'], function (core, Bubble, FlyingBub
     var NewBubble = FlyingBubble.extend(config1, config2);
     for (i = 0; i < n; i++) {
         (new NewBubble({
-            v: {
-                x: Math.random() * 5,
-                y: Math.random() * 5
-            },
-            fly: function() {
+            fly: function () {
+                if (Math.random() < 0.5) {
+                    this.radius = 5;//dynamically bind
+                }
+                this._super();
+            }
+        })).fly();
+    }
+
+    //even call super through the injection chain
+    for (i = 0; i < n; i++) {
+        (new NewBubble([{
+            fly: function () {
                 if (Math.random() < 0.5) {
                     this.radius = 1;//dynamically bind
                 }
                 this._super();
             }
-        })).fly();
+        }, {
+            changeColor: function () {
+                if (this.dontChangeColor) {
+                    return;
+                } else {
+                    this._super();
+                }
+            },
+            fly: function () {
+                if (Math.random() < 0.5) {
+                    this.color = 'red';
+                    this.dontChangeColor = true;
+                }
+                this._super();
+            }
+        }])).fly();
     }
 });

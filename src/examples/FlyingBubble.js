@@ -11,7 +11,7 @@ define(['Bubble'], function (Bubble) {
                 x: 10,
                 y: 10
             };
-            this._super(config);
+            return this._super(config);
         },
         fly: function () {
             var mainRect = {

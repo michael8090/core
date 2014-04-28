@@ -12,7 +12,7 @@ define(['../core'], function (core) {
             this.radius = 50;
             this.slot = document.body;
 
-            this._super(config);
+            return this._super(config);
         },
         render: function () {
             if (!this._hasRendered) {
